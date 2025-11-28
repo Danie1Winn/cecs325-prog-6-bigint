@@ -1,0 +1,18 @@
+{
+    "files.associations": {
+        "bit": "cpp",
+        "charconv": "cpp",
+        "exception": "cpp",
+        "format": "cpp",
+        "iterator": "cpp",
+        "type_traits": "cpp",
+        "xmemory": "cpp",
+        "xstring": "cpp",
+        "xutility": "cpp",
+        "iosfwd": "cpp",
+        "atomic": "cpp",
+        "memory": "cpp",
+        "vector": "cpp",
+        "iostream": "cpp"
+    }
+}
