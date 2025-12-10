@@ -347,30 +347,44 @@ bool BigInt::operator<=(const BigInt& other) {
 
 // ostream operator
 ostream& operator<<(ostream& out, const BigInt& b) {
-    // Assignment requirement: If size > 12, print in scientific notation
+    // print normally
+    if (b.v.size() <= 12) {
+        for (int i = b.v.size() - 1; i >= 0; i--) {
+            out << (int)b.v[i];
+        }
+    } 
+    // requirement: if size > 12, print in scientific notation
+    else {
+        // print first digit
+        out << (int)b.v[b.v.size() - 1] << ".";
 
-    if (b.v.size() > 12) {
-        for (int i = b.v.size() - 1; i >= 0; i--) {
+        // print next 6 digits
+        for (int i = b.v.size() -2; i >= b.v.size() - 7; i--) {
             out << (int)b.v[i];
         }
-    } else {
-        // Print normally
-        for (int i = b.v.size() - 1; i >= 0; i--) {
-            out << (int)b.v[i];
-        }
+
+        // print exponent
+        out << "e" << b.v.size() - 1;
     }
     return out;
 }
 
 // Testing
 int main() {
-    BigInt n1(25);
-    BigInt n2(1234);
-    cout << n2 << " / " << n1 << " = " << n2 / n1 << " rem " << n2 % n1 << endl;
+    BigInt twelve("123456789012");
+    cout << "12 digits: " << twelve << endl;
 
-    BigInt n3("100000");
-    BigInt n4("2");
-    cout << n3 << " / " << n4 << " = " << n3 / n4 << endl;
+    BigInt thirteen("1234567890123");
+    cout << "13 digits: " << thirteen << endl;
+
+    BigInt huge("9223372036854775807"); 
+    cout << "Huge:      " << huge << endl;
+
+    cout << "Full print: ";
+    huge.print();
+    cout << endl;
+
+    return 0;
 
     return 0;
 }
