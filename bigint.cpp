@@ -36,6 +36,7 @@ public:
     BigInt operator+(BigInt);             // addition BigInt + BigInt
     BigInt operator-(BigInt);             // subtraction BigInt - BigInt
     BigInt operator-(int);                // subtraction BigInt - int
+    BigInt operator*(BigInt);             // multiplication BigInt * BigInt
 
     bool operator>(const BigInt&);
     bool operator<(const BigInt&);
@@ -193,6 +194,32 @@ BigInt BigInt::operator-(int n) {
     return *this - BigInt(n);
 }
 
+// BigInt * BigInt
+BigInt BigInt::operator*(BigInt op2) {
+    BigInt product;
+    product.v.clear();
+
+    product.v.resize(this->v.size() + op2.v.size(), 0); // initialize with zeros
+
+    for (size_t i = 0; i < this->v.size(); i++) {
+        int carry = 0;
+        for (size_t j = 0; j < op2.v.size() || carry > 0; j++) {  
+            // current product + existing value + carry
+            int s2_digit = (j < op2.v.size()) ? op2.v[j] : 0;
+
+            long long current = product.v[i + j] + (this->v[i] * s2_digit) + carry;
+
+            product.v[i + j] = current % 10; // store ones place
+            carry = current / 10;            // update carry
+        }
+    }
+    // cleanup leading zeros
+    while (product.v.size() > 1 && product.v.back() == 0) {
+        product.v.pop_back();
+    }
+    return product;
+}
+
 // BigInt > BigInt
 bool BigInt::operator>(const BigInt& other) {
     if (v.size() > other.v.size()) return true;
@@ -251,22 +278,16 @@ ostream& operator<<(ostream& out, const BigInt& b) {
 
 // Testing
 int main() {
-    BigInt n1(100);
-    BigInt n2(99);
-    BigInt n3(1234);
-    BigInt n4(25);
-    BigInt n5(1000000);
-    BigInt n6(1);
+    BigInt n1(12);
+    BigInt n2(12);
+    BigInt n3(0);
+    BigInt huge("1000000000000000000"); 
+    BigInt n4(5);
 
-    cout << "100 - 99 = " << n1 - n2 << endl;
-
-    cout << "100 - 99 (int) = " << n1 - 99 << endl;
-
-    cout << "1234 - 25 = " << n3 - n4 << endl;
-
-    cout << "1000000 - 1 = " << n5 - n6 << endl;
-
-    cout << "25 - 25 = " << n4 - n4 << endl;
+    cout << "12 * 12 = " << n1 * n2 << endl;
+    cout << "12 * 0  = " << n1 * n3 << endl;
+    cout << "huge * 5 = " << huge * n4 << endl;
+    cout << "huge * huge = " << huge * huge << endl;
 
     return 0;
 }
