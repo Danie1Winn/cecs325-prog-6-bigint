@@ -37,6 +37,8 @@ public:
     BigInt operator-(BigInt);             // subtraction BigInt - BigInt
     BigInt operator-(int);                // subtraction BigInt - int
     BigInt operator*(BigInt);             // multiplication BigInt * BigInt
+    BigInt operator/(BigInt);             // division BigInt / BigInt
+    BigInt operator%(BigInt);             // modulus BigInt % BigInt
 
     bool operator>(const BigInt&);
     bool operator<(const BigInt&);
@@ -220,6 +222,90 @@ BigInt BigInt::operator*(BigInt op2) {
     return product;
 }
 
+// BigInt / BigInt
+BigInt BigInt::operator/(BigInt divisor) {
+    if (divisor.v.size() == 1 && divisor.v[0] == 0) {
+        cout << "Cannot divide by zero." << endl;
+        return BigInt(0);
+    }
+    if (*this < divisor) {
+        return BigInt(0);
+    }
+
+    BigInt quotient;
+    quotient.v.clear();     // clears 0
+
+    BigInt remainder(0);
+
+    // iterate from end of the vector to 0
+    for (int i = this->v.size() - 1; i >= 0; i--) {
+        // multiply remainder by 10
+        if (remainder.v.size() == 1 && remainder.v[0] == 0) {
+        } else {
+            BigInt ten(10);
+            remainder = remainder * ten;
+        }
+
+        // add current
+        BigInt currentDigit(this->v[i]);
+        remainder = remainder + currentDigit;
+
+        int count = 0;
+        while (remainder >= divisor) {
+            remainder = remainder - divisor;
+            count++;
+        }
+        // push count to quotient
+        quotient.v.push_back(count);
+    }
+
+    // 
+    int left = 0;
+    int right = quotient.v.size() - 1;
+    while (left < right) {
+        char temp = quotient.v[left];
+        quotient.v[left] = quotient.v[right];
+        quotient.v[right] = temp;
+        left++;
+        right--;
+    }
+
+    // cleanup leading zeros
+    while (quotient.v.size() > 1 && quotient.v.back() == 0) {
+        quotient.v.pop_back();
+    }
+    return quotient;    
+}
+
+// BigInt % BigInt
+BigInt BigInt::operator%(BigInt divisor) {
+    if (divisor.v.size() == 1 && divisor.v[0] == 0) {
+        cout << "Cannot divide by zero." << endl;
+        return BigInt(0);
+    }
+    if (*this < divisor) {
+        return *this;
+    }
+
+    BigInt remainder(0);
+
+    // iterate from end of the vector to 0
+    for (int i = this->v.size() -1; i >= 0; i--) {
+        if (!(remainder.v.size() == 1 && remainder.v[0] == 0)) {
+            BigInt ten(10);
+            remainder = remainder * ten;
+        }
+
+        BigInt currentDigit(this->v[i]);
+        remainder = remainder + currentDigit;
+
+        while (remainder >= divisor) {
+            remainder = remainder - divisor;
+        }
+    }
+    return remainder;
+}
+
 // BigInt > BigInt
 bool BigInt::operator>(const BigInt& other) {
     if (v.size() > other.v.size()) return true;
@@ -278,16 +364,13 @@ ostream& operator<<(ostream& out, const BigInt& b) {
 
 // Testing
 int main() {
-    BigInt n1(12);
-    BigInt n2(12);
-    BigInt n3(0);
-    BigInt huge("1000000000000000000"); 
-    BigInt n4(5);
+    BigInt n1(25);
+    BigInt n2(1234);
+    cout << n2 << " / " << n1 << " = " << n2 / n1 << " rem " << n2 % n1 << endl;
 
-    cout << "12 * 12 = " << n1 * n2 << endl;
-    cout << "12 * 0  = " << n1 * n3 << endl;
-    cout << "huge * 5 = " << huge * n4 << endl;
-    cout << "huge * huge = " << huge * huge << endl;
+    BigInt n3("100000");
+    BigInt n4("2");
+    cout << n3 << " / " << n4 << " = " << n3 / n4 << endl;
 
     return 0;
 }
