@@ -29,6 +29,11 @@ public:
     int size() const;
     void print(); // Print digits
 
+    // Operators
+    bool operator==(const BigInt&);     
+    BigInt operator++(int);             // post-increment n++
+    BigInt operator++();                // pre-increment ++n
+
     // Friend functions
     friend ostream& operator<<(ostream&, const BigInt&);
 };
@@ -73,6 +78,43 @@ void BigInt::print() {
     }
 }
 
+// Operator implementations
+bool BigInt::operator==(const BigInt& other) {
+    if (v.size() != other.v.size()) {
+        return false;
+    }
+    for (size_t i = 0; i < v.size(); ++i) {
+        if (v[i] != other.v[i]) {
+            return false;
+        }
+    }
+    return true;
+}
+
+// Pre-increment
+BigInt BigInt::operator++() {
+    int i = 0;
+    v[i]++;
+    
+    while (v[i] > 9) {
+        v[i] = 0;
+        i++;
+
+        if (i == v.size()) {
+            v.push_back(0);
+        }
+        v[i]++;
+    }
+    return *this;
+}
+
+// Post-increment
+BigInt BigInt::operator++(int) {
+    BigInt temp = *this; // Saves current state
+    ++(*this);          // Calls pre-increment
+    return temp;        // Returns saved state
+}
+
 // Friend implementations
 
 // ostream operator
@@ -97,18 +139,16 @@ int main() {
     BigInt n1(25);
     BigInt s1("25");
     BigInt n2(1234);
-    BigInt s2("1234");
-    BigInt empty;
+    BigInt nine(99);
 
-    cout << "n1(int): " << n1 << endl;
-    cout << "s1(str): " << s1 << endl;
-    cout << "n2(int): " << n2 << endl;
-    cout << "s2(str): " << s2 << endl;
-    cout << "empty(): " << empty << endl;
-
-    cout << "Print method: ";
-    n2.print();
-    cout << endl;
+    cout << "n1: " << n1 << endl;
+    cout << "s1: " << s1 << endl;
+    cout << "n1 == s1? " << (n1 == s1 ? "true" : "false") << endl;
+    cout << "initial nine: " << nine << endl;
+    cout << "++nine: " << ++nine << endl;
+    cout << "initial n1: " << n1 << endl;
+    cout << "n1++: " << n1++ << endl;
+    cout << "after n1++: " << n1 << endl;
 
     return 0;
 }
