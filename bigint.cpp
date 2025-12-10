@@ -31,10 +31,12 @@ public:
 
     // Operators
     bool operator==(const BigInt&);     
-    BigInt operator++(int);             // post-increment n++
-    BigInt operator++();                // pre-increment ++n
+    BigInt operator++(int);                // post-increment n++
+    BigInt operator++();                   // pre-increment ++n
+    BigInt operator+(BigInt);              // addition BigInt + BigInt
 
     // Friend functions
+    friend BigInt operator+(int, BigInt);  // addition int + BigInt
     friend ostream& operator<<(ostream&, const BigInt&);
 };
 
@@ -115,7 +117,43 @@ BigInt BigInt::operator++(int) {
     return temp;        // Returns saved state
 }
 
+// BigInt + BigInt
+BigInt BigInt::operator+(BigInt op2) {
+    BigInt sum;
+    sum.v.clear(); // Clear initial 0
+
+    int carry = 0;
+    size_t i = 0; // Counts index
+
+    // Loops while digits are in either number or carry exists
+    while (i < this->v.size() || i < op2.v.size() || carry > 0) {
+        // grab digit from first num
+        int num1 =  (i < this->v.size()) ? this->v[i] : 0;
+
+        // grab digit from second num
+        int num2 = (i < op2.v.size()) ? op2.v[i] : 0;
+
+        // add
+        int total = num1 + num2 + carry;
+
+        // store ones place digit
+        sum.v.push_back(total % 10);
+
+        // update carry
+        carry = total / 10;
+
+        i++;
+    }
+    return sum;
+}
+
+// int + BigInt
+BigInt operator+(int n, BigInt b) {
+    return b + BigInt(n);
+}
+
 // Friend implementations
+
 
 // ostream operator
 ostream& operator<<(ostream& out, const BigInt& b) {
@@ -137,18 +175,16 @@ ostream& operator<<(ostream& out, const BigInt& b) {
 // Testing
 int main() {
     BigInt n1(25);
-    BigInt s1("25");
     BigInt n2(1234);
-    BigInt nine(99);
+    BigInt maxInt(2147483647);
 
-    cout << "n1: " << n1 << endl;
-    cout << "s1: " << s1 << endl;
-    cout << "n1 == s1? " << (n1 == s1 ? "true" : "false") << endl;
-    cout << "initial nine: " << nine << endl;
-    cout << "++nine: " << ++nine << endl;
-    cout << "initial n1: " << n1 << endl;
-    cout << "n1++: " << n1++ << endl;
-    cout << "after n1++: " << n1 << endl;
+    cout << "n1 + n2 = " << n1 + n2 << endl;
+    cout << "10 + n1 = " << 10 + n1 << endl;
+
+    BigInt nine(99);
+    cout << "99 + 1  = " << nine + BigInt(1) << endl;
+    
+    cout << "maxInt + maxInt = " << maxInt + maxInt << endl;
 
     return 0;
 }
