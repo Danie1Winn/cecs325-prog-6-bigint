@@ -31,9 +31,16 @@ public:
 
     // Operators
     bool operator==(const BigInt&);     
-    BigInt operator++(int);                // post-increment n++
-    BigInt operator++();                   // pre-increment ++n
-    BigInt operator+(BigInt);              // addition BigInt + BigInt
+    BigInt operator++(int);               // post-increment n++
+    BigInt operator++();                  // pre-increment ++n
+    BigInt operator+(BigInt);             // addition BigInt + BigInt
+    BigInt operator-(BigInt);             // subtraction BigInt - BigInt
+    BigInt operator-(int);                // subtraction BigInt - int
+
+    bool operator>(const BigInt&);
+    bool operator<(const BigInt&);
+    bool operator>=(const BigInt&);
+    bool operator<=(const BigInt&);
 
     // Friend functions
     friend BigInt operator+(int, BigInt);  // addition int + BigInt
@@ -152,6 +159,76 @@ BigInt operator+(int n, BigInt b) {
     return b + BigInt(n);
 }
 
+// BigInt - BigInt
+BigInt BigInt::operator-(BigInt other) {
+    // Assume *this >= other, otherwise return 0
+    BigInt result = *this;
+
+    for (size_t i = 0; i < other.v.size(); i++) {
+        result.v[i] -= other.v[i]; // subtract
+
+        // borrow
+        if (result.v[i] < 0) {
+            result.v[i] += 10;  // add 10
+            result.v[i + 1]--;  // borrow from next digit
+
+            // handles if next digit goes negative
+            int k = i + 1;
+            while (result.v[k] < 0) {
+                result.v[k] += 10;
+                result.v[k + 1]--;
+                k++;
+            }
+        }
+    }
+    // cleanup leading zeros
+    while (result.v.size() > 1 && result.v.back() == 0) {
+        result.v.pop_back();
+    }
+    return result;
+}
+
+// BigInt - int
+BigInt BigInt::operator-(int n) {
+    return *this - BigInt(n);
+}
+
+// BigInt > BigInt
+bool BigInt::operator>(const BigInt& other) {
+    if (v.size() > other.v.size()) return true;
+    if (v.size() < other.v.size()) return false;
+
+    // if same size compares digit by digit
+     for (int i = v.size() - 1; i >= 0; i--) {
+        if (v[i] > other.v[i]) return true;
+        if (v[i] < other.v[i]) return false;
+     }
+     return false; // if equal
+}
+
+// BigInt < BigInt
+bool BigInt::operator<(const BigInt& other) {
+    if (v.size() < other.v.size()) return true;
+    if (v.size() > other.v.size()) return false;
+
+    // if same size compares digit by digit
+     for (int i = v.size() - 1; i >= 0; i--) {
+        if (v[i] < other.v[i]) return true;
+        if (v[i] > other.v[i]) return false;
+     }
+     return false; // if equal
+}
+
+// BigInt >= BigInt
+bool BigInt::operator>=(const BigInt& other) {
+    return !(*this < other); // not less than
+}
+
+// BigInt <= BigInt
+bool BigInt::operator<=(const BigInt& other) {
+    return !(*this > other); // not greater than
+}
+
 // Friend implementations
 
 
@@ -174,17 +251,22 @@ ostream& operator<<(ostream& out, const BigInt& b) {
 
 // Testing
 int main() {
-    BigInt n1(25);
-    BigInt n2(1234);
-    BigInt maxInt(2147483647);
+    BigInt n1(100);
+    BigInt n2(99);
+    BigInt n3(1234);
+    BigInt n4(25);
+    BigInt n5(1000000);
+    BigInt n6(1);
 
-    cout << "n1 + n2 = " << n1 + n2 << endl;
-    cout << "10 + n1 = " << 10 + n1 << endl;
+    cout << "100 - 99 = " << n1 - n2 << endl;
 
-    BigInt nine(99);
-    cout << "99 + 1  = " << nine + BigInt(1) << endl;
-    
-    cout << "maxInt + maxInt = " << maxInt + maxInt << endl;
+    cout << "100 - 99 (int) = " << n1 - 99 << endl;
+
+    cout << "1234 - 25 = " << n3 - n4 << endl;
+
+    cout << "1000000 - 1 = " << n5 - n6 << endl;
+
+    cout << "25 - 25 = " << n4 - n4 << endl;
 
     return 0;
 }
