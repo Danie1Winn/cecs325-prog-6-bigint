@@ -8,6 +8,8 @@
 #include <iostream>
 #include <vector>
 #include <string> 
+#include <climits>
+#include <iomanip>
 
 // No namespace std allowed
 using std::cout;
@@ -15,10 +17,17 @@ using std::endl;
 using std::vector;
 using std::string;
 using std::ostream;
+using std::flush;
+using std::setw;
 
 class BigInt {
 private:
     vector<char> v; //<- notice this is a vector of char, not int
+
+    // helpers for tail recursion
+    BigInt fiboTail(int n, BigInt a, BigInt b);
+
+    BigInt factTail(int n, BigInt result);
 
 public:
     BigInt();
@@ -39,6 +48,9 @@ public:
     BigInt operator*(BigInt);             // multiplication BigInt * BigInt
     BigInt operator/(BigInt);             // division BigInt / BigInt
     BigInt operator%(BigInt);             // modulus BigInt % BigInt
+    BigInt fibo();                        // fibonacci
+    BigInt fact();                        // factorial
+    BigInt collatz(bool printSteps);      // collatz conjecture
 
     bool operator>(const BigInt&);
     bool operator<(const BigInt&);
@@ -369,22 +381,139 @@ ostream& operator<<(ostream& out, const BigInt& b) {
     return out;
 }
 
-// Testing
-int main() {
-    BigInt twelve("123456789012");
-    cout << "12 digits: " << twelve << endl;
-
-    BigInt thirteen("1234567890123");
-    cout << "13 digits: " << thirteen << endl;
-
-    BigInt huge("9223372036854775807"); 
-    cout << "Huge:      " << huge << endl;
-
-    cout << "Full print: ";
-    huge.print();
-    cout << endl;
+// BigInt to int
+int bigIntToInt(const BigInt& b) {
+    int sum = 0;
+    int multiplier = 1;
 
     return 0;
+}
+
+// factorial
+BigInt BigInt::factTail(int n, BigInt result) {
+    if (n <= 1) {
+        return result;
+    }
+    return factTail(n - 1, result * BigInt(n));
+}
+
+BigInt BigInt::fact() {
+    // convert *this to int
+    int n = 0;
+    int multiplier = 1;
+    for (size_t i = 0; i < v.size(); i++) {
+        n += v[i] * multiplier;
+        multiplier *= 10;
+    }
+    return factTail(n, BigInt(1));
+}
+
+// fibonacci
+BigInt BigInt::fiboTail(int n, BigInt a, BigInt b) {
+    if (n == 0) {
+        return a;
+    }
+    return fiboTail(n - 1, b, a + b);
+}
+
+BigInt BigInt::fibo() {
+    // convert *this to int
+    int n = 0;
+    int multiplier = 1;
+    for (size_t i = 0; i < v.size(); i++) {
+        n += v[i] * multiplier;
+        multiplier *= 10;
+    }
+    return fiboTail(n, BigInt(0), BigInt(1));
+}
+
+// collatz
+BigInt BigInt::collatz(bool printSteps) {
+    BigInt n = *this; // copy of current BigInt
+    BigInt steps(0);
+    BigInt one(1);
+    BigInt two(2);
+    BigInt three (3);
+
+    if (printSteps) {
+        cout << n << " ";
+    }
+
+    while (!(n == one)) {
+        // check even / odd
+        BigInt rem = n % two;
+
+        if (rem == BigInt(0)) {
+            n = n / two; 
+        } else {
+            n = (n * three) + one;
+        }
+
+        if (printSteps) {
+            cout << n << " ";
+        }
+        steps++;
+    }
+    return steps;
+}
+
+int main()
+{
+    int space = 10;
+    cout << "\a\nTestUnit:\n" << flush;
+    cout << "User Name:" << flush;
+    system("whoami");
+    system("date");
+    BigInt n1(25);
+    BigInt s1("25");
+    BigInt n2(1234);
+    BigInt s2("1234");
+    BigInt n3(n2);
+    BigInt X(3000);
+    BigInt Y(50);
+    BigInt Z1(123);
+    BigInt Z2("989345275647");
+    BigInt Z3(X.fibo());
+    BigInt imax = INT_MAX;
+    BigInt big("9223372036854775807");
+    
+    cout << "n1(int) :" << setw(space) << n1 << endl;
+    cout << "s1(str) :" << setw(space) << s1 << endl;
+    cout << "n2(int) :" << setw(space) << n2 << endl;
+    cout << "s2(str) :" << setw(space) << s2 << endl;
+    cout << "n3(n2) :" << setw(space) << n3 << endl;
+    cout << "X.fibo(1234):" <<setw(space) << X.fibo() << endl;
+    cout << "Y.fact(50) :" << setw(space) << Y.fact() << endl;
+    cout << "imax :" << setw(space) << imax << endl;
+    cout << "big :" << setw(space) << big << endl;
+    cout << "big.print(): "; big.print(); cout << endl;
+    
+    cout << n2 << "/" << n1 << " = " << n2/n1 <<" rem "<<n2%n1<<endl;
+    cout << "fibo("<<X<<") = "<<X.fibo() << endl;
+    cout << "fact("<<Y<<") = "<<Y.fact() << endl;
+    
+    bool printSteps = true;
+    cout << "steps for collatz(" << Z1<<"):" << Z1.collatz(printSteps) << endl;
+    
+    printSteps = false;
+   
+    // 1348 steps per Wikipedia https://en.wikipedia.org/wiki/Collatz_conjecture
+    cout << "steps for collatz(" << Z2<<"):"<< Z2.collatz(printSteps) << endl;
+    
+    cout << "steps for collatz(" << Z3<<"):"<< Z3.collatz(printSteps) << endl;
+    
+    cout << "10 + n1 = " << BigInt(10) + n1 << endl;
+    cout << "n1 + 10 = " << n1 + BigInt(10) << endl;
+    
+    cout << "(n1 == s1)? --> "<<((n1==s1)?"true":"false")<<endl;
+    cout << "n1++ = ? --> before:"<<n1++<<" after:" << n1 << endl;
+    cout << "++s1 = ? --> before:"<<++s1<<" after:" << s1 << endl;
+    
+    cout << "s2 * big = ? --> "<< s2 * big << endl;
+    cout << "big * s2 = ? --> "<< big * s2 << endl;
+    
+    cout << endl;
+    system("date");
 
     return 0;
 }
